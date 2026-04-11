@@ -15,18 +15,19 @@ const currentYear = new Date().getFullYear();
       </a>
     </div>
 
-    <div class="text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
-      <span class="flex items-center gap-1">
-        本站已运行：<site-timer class="font-mono text-[var(--primary)] opacity-90">数据计算中...</site-timer>
-      </span>
-    </div>
+    <div class="flex flex-col items-center w-full">
+      <div class="flex items-center justify-center text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
+        <span>本站已运行：</span>
+        <site-timer class="font-mono text-[var(--primary)] opacity-90 -ml-0.5">数据计算中...</site-timer>
+      </div>
 
-    <div class="flex items-center justify-center gap-x-1.5 text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
-      <span>Copyright &copy; <span id="copyright-year">{currentYear}</span></span>
-      <a href="/" class="flex items-center gap-1.5 hover:text-[var(--primary)] transition-all active:scale-95">
-        <img src="/favicon.png" alt="" class="h-4 w-4 shrink-0 object-contain !bg-transparent !border-none !shadow-none relative -top-[0.4px]" />
-        <span>安锐的小站</span>
-      </a>
+      <div class="flex items-center justify-center gap-x-[2.75px] text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5 relative -left-[0.25px]">
+        <span>Copyright &copy; <span id="copyright-year">{currentYear}</span></span>
+        <a href="/" class="flex items-center gap-[2.75px] hover:text-[var(--primary)] transition-all active:scale-95">
+          <img src="/favicon.png" alt="" class="h-[15px] w-[15px] shrink-0 object-contain !bg-transparent !border-none !shadow-none relative -top-[0.4px]" />
+          <span>安锐的小站</span>
+        </a>
+      </div>
     </div>
 
     <div class="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-[12px] text-black/50 dark:text-white/50 font-medium border-t border-black/5 dark:border-white/5 pt-3 w-full mt-1">
@@ -44,17 +45,13 @@ const currentYear = new Date().getFullYear();
 </div>
 
 <script is:inline>
-  // 使用浏览器原生 Web Component，无视任何框架玄学 Bug
   class SiteTimer extends HTMLElement {
-    // 当这个标签出现在屏幕上时，浏览器会自动调用这里
     connectedCallback() {
-      // 北京时间 2026-02-25 00:00:00 等于 UTC 时间的 2 月 24 日 16:00
       this.startMs = Date.UTC(2026, 1, 24, 16, 0, 0);
       this.update();
       this.timer = setInterval(() => this.update(), 1000);
     }
     
-    // 当你离开这个页面时，浏览器会自动调用这里，销毁定时器防止卡顿
     disconnectedCallback() {
       clearInterval(this.timer);
     }
@@ -68,7 +65,6 @@ const currentYear = new Date().getFullYear();
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
       
-      // 直接修改自身的内容，不需要 document.getElementById
       this.innerText = d + "天" + 
                        (h < 10 ? '0' + h : h) + "时" + 
                        (m < 10 ? '0' + m : m) + "分" + 
@@ -76,7 +72,6 @@ const currentYear = new Date().getFullYear();
     }
   }
 
-  // 向浏览器注册这个新标签
   if (!customElements.get('site-timer')) {
     customElements.define('site-timer', SiteTimer);
   }
