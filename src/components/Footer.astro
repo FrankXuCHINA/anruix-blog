@@ -17,7 +17,7 @@ const currentYear = new Date().getFullYear();
 
     <div class="text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
       <span class="flex items-center gap-1">
-        本站已运行：<span id="running-time" class="font-mono text-[var(--primary)] opacity-90">00天00时00分00秒</span>
+        本站已运行：<span id="running-time" class="font-mono text-[var(--primary)] opacity-90">载入中...</span>
       </span>
     </div>
 
@@ -44,38 +44,35 @@ const currentYear = new Date().getFullYear();
 </div>
 
 <script is:inline>
-  // 使用立即执行函数，并把逻辑挂载到 window 确保不被销毁
   (function() {
-    var startTime = new Date(2026, 1, 25, 0, 0, 0).getTime();
-    
-    function update() {
+    // 采用 UTC 绝对毫秒数：2026-02-25 00:00:00 (北京时间) 等于 2026-02-24 16:00:00 (UTC)
+    // 彻底杜绝所有手机浏览器的时区解析偏差
+    var startMs = Date.UTC(2026, 1, 24, 16, 0, 0);
+
+    function tick() {
+      // 核心修复：每次 tick 都重新抓取 DOM，无惧 Astro 路由瞬间切换导致的元素丢失
       var el = document.getElementById('running-time');
       if (!el) return;
 
-      var diff = new Date().getTime() - startTime;
-      if (diff < 0) {
-        el.innerHTML = "启航中";
-        return;
-      }
+      var diff = Date.now() - startMs;
+      if (diff < 0) return;
 
       var d = Math.floor(diff / 86400000);
       var h = Math.floor((diff % 86400000) / 3600000);
       var m = Math.floor((diff % 3600000) / 60000);
       var s = Math.floor((diff % 60000) / 1000);
 
-      el.innerHTML = d + "天" + 
+      // 使用 innerText 提升性能
+      el.innerText = d + "天" + 
                      (h < 10 ? '0' + h : h) + "时" + 
                      (m < 10 ? '0' + m : m) + "分" + 
                      (s < 10 ? '0' + s : s) + "秒";
     }
 
-    // 三重启动保险：立即执行 + 定时重试 + 状态监听
-    update(); 
-    var timer = setInterval(update, 1000);
-
-    // 针对手机端 bfcache 的修复
-    window.addEventListener('pageshow', function() {
-      if (!timer) timer = setInterval(update, 1000);
-    });
+    // 核心修复：使用 setTimeout(..., 0) 将脚本推入异步队列，绝对不阻塞 HTML 渲染，保证页面秒开
+    setTimeout(function() {
+      tick();
+      setInterval(tick, 1000);
+    }, 0);
   })();
 </script>
