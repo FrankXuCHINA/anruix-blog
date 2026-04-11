@@ -10,7 +10,7 @@ const currentYear = new Date().getFullYear();
     <div class="flex items-center gap-2.5 text-[13px] text-black/60 dark:text-white/60 font-medium">
       <span>Powered by <a class="hover:text-[var(--primary)] transition" target="_blank" href="https://astro.build/">Astro</a> & <a class="hover:text-[var(--primary)] transition" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a></span>
       <span class="opacity-30">|</span>
-      <a target="_blank" href="https://pages.edgeone.ai/" class="transition-transform hover:scale-110 flex items-center">
+      <a target="_blank" href="https://pages.edgeone.ai/" class="transition-transform hover:scale-110 flex items-center relative -top-[0.4px]">
         <img src="/edgeone.svg" alt="EdgeOne" class="h-[18px] w-auto dark:invert dark:hue-rotate-180 opacity-60 hover:opacity-100 transition-opacity" />
       </a>
     </div>
@@ -24,7 +24,7 @@ const currentYear = new Date().getFullYear();
     <div class="flex items-center justify-center gap-x-1.5 text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
       <span>Copyright &copy; <span id="copyright-year">{currentYear}</span></span>
       <a href="/" class="flex items-center gap-1.5 hover:text-[var(--primary)] transition-all active:scale-95">
-        <img src="/favicon.png" alt="" class="h-4 w-4 shrink-0 object-contain !bg-transparent !border-none !shadow-none" />
+        <img src="/favicon.png" alt="" class="h-4 w-4 shrink-0 object-contain !bg-transparent !border-none !shadow-none relative -top-[0.6px]" />
         <span>安锐的小站</span>
       </a>
     </div>
@@ -46,9 +46,9 @@ const currentYear = new Date().getFullYear();
 
 <script is:inline>
   function updateRunningTime() {
-    // 兼容性写法：年, 月(0-11), 日, 时, 分, 秒 (2月对应参数 1)
-    const startTime = new Date(2026, 1, 25, 0, 0, 0); 
-    const now = new Date();
+    // 采用硬编码时间戳 (2026-02-25 00:00:00 CST)，彻底避开所有移动端时区解析坑
+    const startTime = 1740412800000; 
+    const now = new Date().getTime();
     const diff = now - startTime;
 
     if (diff < 0) return;
@@ -58,12 +58,17 @@ const currentYear = new Date().getFullYear();
     const minutes = Math.floor((diff / (1000 * 60)) % 60);
     const seconds = Math.floor((diff / 1000) % 60);
 
-    // 去除所有内部空格，紧凑显示
-    const display = `${days}天${hours.toString().padStart(2, '0')}时${minutes.toString().padStart(2, '0')}分${seconds.toString().padStart(2, '0')}秒`;
+    // 使用最基础的字符串拼接，防止 ES6 模板在极老旧内核上抽风
+    const display = days + "天" + 
+                    (hours < 10 ? "0" + hours : hours) + "时" + 
+                    (minutes < 10 ? "0" + minutes : minutes) + "分" + 
+                    (seconds < 10 ? "0" + seconds : seconds) + "秒";
     
     const el = document.getElementById('running-time');
     if (el) el.innerText = display;
   }
-  setInterval(updateRunningTime, 1000);
+  
+  // 立即执行并设设定时
   updateRunningTime();
+  setInterval(updateRunningTime, 1000);
 </script>
