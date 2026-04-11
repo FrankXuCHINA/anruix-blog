@@ -17,7 +17,7 @@ const currentYear = new Date().getFullYear();
 
     <div class="text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
       <span class="flex items-center gap-1">
-        本站已运行：<span id="running-time" class="font-mono text-[var(--primary)] opacity-90">载入中...</span>
+        本站已运行：<site-timer class="font-mono text-[var(--primary)] opacity-90">数据计算中...</site-timer>
       </span>
     </div>
 
@@ -43,47 +43,41 @@ const currentYear = new Date().getFullYear();
   </div>
 </div>
 
-<script is:inline data-astro-rerun>
-  (function() {
-    // 确保全局只有一个定时器，避免切换页面导致定时器叠加引发卡顿
-    if (window.runningTimer) {
-      clearInterval(window.runningTimer);
+<script is:inline>
+  // 使用浏览器原生 Web Component，无视任何框架玄学 Bug
+  class SiteTimer extends HTMLElement {
+    // 当这个标签出现在屏幕上时，浏览器会自动调用这里
+    connectedCallback() {
+      // 北京时间 2026-02-25 00:00:00 等于 UTC 时间的 2 月 24 日 16:00
+      this.startMs = Date.UTC(2026, 1, 24, 16, 0, 0);
+      this.update();
+      this.timer = setInterval(() => this.update(), 1000);
     }
-
-    var startMs = Date.UTC(2026, 1, 24, 16, 0, 0);
-
-    function tick() {
-      var el = document.getElementById('running-time');
-      if (!el) return;
-
-      var diff = Date.now() - startMs;
-      if (diff < 0) return;
-
-      var d = Math.floor(diff / 86400000);
-      var h = Math.floor((diff % 86400000) / 3600000);
-      var m = Math.floor((diff % 3600000) / 60000);
-      var s = Math.floor((diff % 60000) / 1000);
-
-      el.innerText = d + "天" + 
-                     (h < 10 ? '0' + h : h) + "时" + 
-                     (m < 10 ? '0' + m : m) + "分" + 
-                     (s < 10 ? '0' + s : s) + "秒";
-    }
-
-    // 核心修复：监听 Astro 的专属页面加载事件
-    function init() {
-      tick(); // 立即执行一次，告别载入中
-      window.runningTimer = setInterval(tick, 1000);
-    }
-
-    // 适配普通刷新和 Astro 无感刷新
-    document.addEventListener('astro:page-load', init, { once: true });
     
-    // 如果浏览器不支持 astro 事件或直接命中 DOM，做个兜底
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      init();
-    } else {
-      document.addEventListener('DOMContentLoaded', init);
+    // 当你离开这个页面时，浏览器会自动调用这里，销毁定时器防止卡顿
+    disconnectedCallback() {
+      clearInterval(this.timer);
     }
-  })();
+    
+    update() {
+      const diff = Date.now() - this.startMs;
+      if (diff < 0) return;
+      
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      
+      // 直接修改自身的内容，不需要 document.getElementById
+      this.innerText = d + "天" + 
+                       (h < 10 ? '0' + h : h) + "时" + 
+                       (m < 10 ? '0' + m : m) + "分" + 
+                       (s < 10 ? '0' + s : s) + "秒";
+    }
+  }
+
+  // 向浏览器注册这个新标签
+  if (!customElements.get('site-timer')) {
+    customElements.define('site-timer', SiteTimer);
+  }
 </script>
