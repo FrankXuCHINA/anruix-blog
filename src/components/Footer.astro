@@ -10,34 +10,63 @@ const currentYear = new Date().getFullYear();
 
       <div class="w-full mb-8">
         
-        <div class="w-full bg-gradient-to-r from-[oklch(97%_0.01_var(--hue))] to-[oklch(95%_0.02_var(--hue))] dark:from-[oklch(18%_0.02_var(--hue))] dark:to-[oklch(15%_0.03_var(--hue))] rounded-xl p-5">
+        <div class="w-full bg-gradient-to-r from-[oklch(97%_0.01_var(--hue))] to-[oklch(95%_0.02_var(--hue))] dark:from-[oklch(18%_0.02_var(--hue))] dark:to-[oklch(15%_0.03_var(--hue))] rounded-xl p-5 flex flex-col items-center space-y-3">
           
-          <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
-            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-black/70 dark:text-white/70">
-              <span class="font-medium">
-                Copyright &copy; <span id="copyright-year">{currentYear}</span> 
-                <a href="/" class="transition hover:text-[var(--primary)]">安锐的小站</a>
-              </span>
-            </div>
-            <a target="_blank" href="https://pages.edgeone.ai/" class="transition-transform hover:scale-105">
-              <img src="/edgeone.svg" alt="EdgeOne" class="h-4 w-auto shrink-0 dark:invert dark:hue-rotate-180 opacity-70 hover:opacity-100 transition-opacity" />
+          <div class="flex items-center gap-2.5 text-[13px] text-black/60 dark:text-white/60 font-medium">
+            <span>Powered by <a class="hover:text-[var(--primary)] transition" target="_blank" href="https://astro.build/">Astro</a> & <a class="hover:text-[var(--primary)] transition" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a></span>
+            <span class="opacity-30">|</span>
+            <a target="_blank" href="https://pages.edgeone.ai/" class="transition-transform hover:scale-110 flex items-center">
+              <img src="/edgeone.svg" alt="EdgeOne" class="h-[18px] w-auto dark:invert dark:hue-rotate-180 opacity-60 hover:opacity-100 transition-opacity" />
             </a>
           </div>
 
-          <div class="mt-2 pt-2 border-t border-black/10 dark:border-white/10 flex flex-col items-center gap-2 text-xs text-black/50 dark:text-white/50">
-            <div class="flex flex-wrap justify-center items-center gap-x-4 gap-y-2">
-              <a class="flex items-center gap-1 hover:text-[var(--primary)] transition-colors font-medium" target="_blank" href="https://beian.miit.gov.cn/">
-                <img src="/beian.png" alt="ICP备案" class="h-[14px] w-auto shrink-0" />
-                <span>苏ICP备2026009777号-1</span>
-              </a>
-              <span class="hidden sm:inline opacity-50">|</span>
-              <a class="flex items-center gap-1 hover:text-[var(--primary)] transition-colors font-medium" target="_blank" href="https://beian.mps.gov.cn/#/query/webSearch?code=32059002007595">
-                <img src="/beian-police.png" alt="公安备案" class="h-[14px] w-auto shrink-0" />
-                <span>苏公网安备32059002007595号</span>
-              </a>
-            </div>
+          <div class="text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
+            <span class="flex items-center gap-1">
+              本站已运行：<span id="running-time" class="font-mono text-[var(--primary)] opacity-90">00天00时00分00秒</span>
+            </span>
+          </div>
+
+          <div class="flex items-center justify-center gap-x-1.5 text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
+            <span>Copyright &copy; <span id="copyright-year">{currentYear}</span></span>
+            <a href="/" class="flex items-center gap-1.5 hover:text-[var(--primary)] transition-all active:scale-95">
+              <img src="/favicon.png" alt="" class="h-4 w-4 shrink-0 object-contain" />
+              <span>安锐的小站</span>
+            </a>
+          </div>
+
+          <div class="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-[12px] text-black/50 dark:text-white/50 font-medium border-t border-black/5 dark:border-white/5 pt-3 w-full mt-1">
+            <a class="flex items-center gap-1 hover:text-[var(--primary)] transition-colors" target="_blank" href="https://beian.miit.gov.cn/">
+              <img src="/beian.png" alt="ICP备案" class="h-[12px] w-auto shrink-0 opacity-70" />
+              <span>苏ICP备2026009777号-1</span>
+            </a>
+            <span class="hidden sm:inline opacity-20">|</span>
+            <a class="flex items-center gap-1 hover:text-[var(--primary)] transition-colors" target="_blank" href="https://beian.mps.gov.cn/#/query/webSearch?code=32059002007595">
+              <img src="/beian-police.png" alt="公安备案" class="h-[12px] w-auto shrink-0 opacity-70" />
+              <span>苏公网安备32059002007595号</span>
+            </a>
           </div>
 
         </div>
-
       </div>
+
+<script is:inline>
+  function updateRunningTime() {
+    // 已更新为 2026-02-25
+    const startTime = new Date("2026-02-25T00:00:00"); 
+    const now = new Date();
+    const diff = now - startTime;
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    // 维持无空格紧凑显示
+    const display = `${days}天${hours.toString().padStart(2, '0')}时${minutes.toString().padStart(2, '0')}分${seconds.toString().padStart(2, '0')}秒`;
+    
+    const el = document.getElementById('running-time');
+    if (el) el.innerText = display;
+  }
+  setInterval(updateRunningTime, 1000);
+  updateRunningTime();
+</script>
