@@ -17,7 +17,7 @@ const currentYear = new Date().getFullYear();
 
     <div class="text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
       <span class="flex items-center gap-1">
-        本站已运行：<span id="running-time" class="font-mono text-[var(--primary)] opacity-90">数据读取中</span>
+        本站已运行：<span id="running-time" class="font-mono text-[var(--primary)] opacity-90">00天00时00分00秒</span>
       </span>
     </div>
 
@@ -44,18 +44,17 @@ const currentYear = new Date().getFullYear();
 </div>
 
 <script is:inline>
-  // 立即执行函数
+  // 使用立即执行函数，并把逻辑挂载到 window 确保不被销毁
   (function() {
-    var el = document.getElementById('running-time');
-    // 2026-02-25 00:00:00
     var startTime = new Date(2026, 1, 25, 0, 0, 0).getTime();
-
+    
     function update() {
-      var now = new Date().getTime();
-      var diff = now - startTime;
+      var el = document.getElementById('running-time');
+      if (!el) return;
 
+      var diff = new Date().getTime() - startTime;
       if (diff < 0) {
-        if (el) el.innerHTML = "启航中";
+        el.innerHTML = "启航中";
         return;
       }
 
@@ -64,16 +63,19 @@ const currentYear = new Date().getFullYear();
       var m = Math.floor((diff % 3600000) / 60000);
       var s = Math.floor((diff % 60000) / 1000);
 
-      if (el) {
-        el.innerHTML = d + "天" + 
-                       (h < 10 ? "0" + h : h) + "时" + 
-                       (m < 10 ? "0" + m : m) + "分" + 
-                       (s < 10 ? "0" + s : s) + "秒";
-      }
+      el.innerHTML = d + "天" + 
+                     (h < 10 ? '0' + h : h) + "时" + 
+                     (m < 10 ? '0' + m : m) + "分" + 
+                     (s < 10 ? '0' + s : s) + "秒";
     }
 
-    // 既然脚本在元素下方，直接运行
-    update();
-    setInterval(update, 1000);
+    // 三重启动保险：立即执行 + 定时重试 + 状态监听
+    update(); 
+    var timer = setInterval(update, 1000);
+
+    // 针对手机端 bfcache 的修复
+    window.addEventListener('pageshow', function() {
+      if (!timer) timer = setInterval(update, 1000);
+    });
   })();
 </script>
