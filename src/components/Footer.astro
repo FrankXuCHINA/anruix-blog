@@ -10,21 +10,21 @@ const currentYear = new Date().getFullYear();
     <div class="flex items-center gap-2.5 text-[13px] text-black/60 dark:text-white/60 font-medium">
       <span>Powered by <a class="hover:text-[var(--primary)] transition" target="_blank" href="https://astro.build/">Astro</a> & <a class="hover:text-[var(--primary)] transition" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a></span>
       <span class="opacity-30">|</span>
-      <a target="_blank" href="https://pages.edgeone.ai/" class="transition-transform hover:scale-110 flex items-center relative -top-[0.4px]">
+      <a target="_blank" href="https://pages.edgeone.ai/" class="transition-transform hover:scale-110 flex items-center relative -top-[0.5px]">
         <img src="/edgeone.svg" alt="EdgeOne" class="h-[18px] w-auto dark:invert dark:hue-rotate-180 opacity-60 hover:opacity-100 transition-opacity" />
       </a>
     </div>
 
     <div class="text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
       <span class="flex items-center gap-1">
-        本站已运行：<span id="running-time" class="font-mono text-[var(--primary)] opacity-90">00天00时00分00秒</span>
+        本站已运行：<span id="running-time" class="font-mono text-[var(--primary)] opacity-90">计时中...</span>
       </span>
     </div>
 
     <div class="flex items-center justify-center gap-x-1.5 text-[13px] text-black/60 dark:text-white/60 font-medium pt-0.5">
       <span>Copyright &copy; <span id="copyright-year">{currentYear}</span></span>
       <a href="/" class="flex items-center gap-1.5 hover:text-[var(--primary)] transition-all active:scale-95">
-        <img src="/favicon.png" alt="" class="h-4 w-4 shrink-0 object-contain !bg-transparent !border-none !shadow-none relative -top-[0.6px]" />
+        <img src="/favicon.png" alt="" class="h-4 w-4 shrink-0 object-contain !bg-transparent !border-none !shadow-none relative -top-[0.5px]" />
         <span>安锐的小站</span>
       </a>
     </div>
@@ -45,30 +45,41 @@ const currentYear = new Date().getFullYear();
 </div>
 
 <script is:inline>
-  function updateRunningTime() {
-    // 采用硬编码时间戳 (2026-02-25 00:00:00 CST)，彻底避开所有移动端时区解析坑
-    const startTime = 1740412800000; 
-    const now = new Date().getTime();
-    const diff = now - startTime;
+  function initTimer() {
+    function update() {
+      // 绝对修正：2026年2月25日 00:00:00 (JavaScript 月份从0开始算，1代表2月)
+      var start = new Date(2026, 1, 25, 0, 0, 0).getTime();
+      var now = new Date().getTime();
+      var diff = now - start;
 
-    if (diff < 0) return;
+      if (isNaN(diff) || diff < 0) {
+        var el = document.getElementById('running-time');
+        if (el) el.innerHTML = "启航中...";
+        return;
+      }
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor((diff / 3600000) % 24);
+      var m = Math.floor((diff / 60000) % 60);
+      var s = Math.floor((diff / 1000) % 60);
 
-    // 使用最基础的字符串拼接，防止 ES6 模板在极老旧内核上抽风
-    const display = days + "天" + 
-                    (hours < 10 ? "0" + hours : hours) + "时" + 
-                    (minutes < 10 ? "0" + minutes : minutes) + "分" + 
-                    (seconds < 10 ? "0" + seconds : seconds) + "秒";
+      var res = d + "天" + 
+                (h < 10 ? "0" + h : h) + "时" + 
+                (m < 10 ? "0" + m : m) + "分" + 
+                (s < 10 ? "0" + s : s) + "秒";
+      
+      var target = document.getElementById('running-time');
+      if (target) target.innerHTML = res;
+    }
     
-    const el = document.getElementById('running-time');
-    if (el) el.innerText = display;
+    update();
+    setInterval(update, 1000);
   }
   
-  // 立即执行并设设定时
-  updateRunningTime();
-  setInterval(updateRunningTime, 1000);
+  // 确保页面加载后执行
+  if (document.readyState === 'complete') {
+    initTimer();
+  } else {
+    window.addEventListener('load', initTimer);
+  }
 </script>
